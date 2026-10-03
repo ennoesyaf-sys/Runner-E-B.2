@@ -1,0 +1,414 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>On Safari Past Simple</title>
+<style>
+:root{color-scheme:light}
+html,body{margin:0;min-height:100%}
+img{max-width:100%}
+[hidden]{display:none!important}
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: one long field-sheet. Sticky scoreboard on top, one card per lesson step, answer key unfolds under each card after checking. */
+:root{
+  --bg:#FFE9F3; --bg2:#EADDFF; --surface:#FFFFFF; --ink:#3B2147; --muted:#7A5C8A; --line:#F2C6DD;
+  --accent:#D6307F; --on-accent:#FFFFFF; --leaf:#7B3FD1; --sky:#1A6FA8;
+  --c1:#D6307F; --c2:#7B3FD1; --c3:#0B7F84; --c4:#D9601A; --on-c:#FFFFFF; --shadow:rgba(214,48,127,.16);
+  --good:#1E8E5A; --good-bg:#D9F6E6; --bad:#C62F58; --bad-bg:#FFDDE6; --key-bg:#FFF4C9; --key-line:#E8BE3C;
+  --display:'Bricolage Grotesque','Trebuchet MS',system-ui,sans-serif;
+  --body:'Figtree',system-ui,-apple-system,'Segoe UI',sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#24112F; --bg2:#14183A; --surface:#341B45; --ink:#FBE9F5; --muted:#D5B3E6; --line:#5A3470;
+  --accent:#FF7EB6; --on-accent:#2B0F22; --leaf:#C9A2FF; --sky:#7FD0FF;
+  --c1:#FF7EB6; --c2:#C9A2FF; --c3:#5FDCD6; --c4:#FFB074; --on-c:#2B0F22; --shadow:rgba(0,0,0,.35);
+  --good:#7BE0A8; --good-bg:#1F4A38; --bad:#FF8FAE; --bad-bg:#4D1F34; --key-bg:#4A3A1A; --key-line:#A8892F; color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --bg:#24112F; --bg2:#14183A; --surface:#341B45; --ink:#FBE9F5; --muted:#D5B3E6; --line:#5A3470;
+  --accent:#FF7EB6; --on-accent:#2B0F22; --leaf:#C9A2FF; --sky:#7FD0FF;
+  --c1:#FF7EB6; --c2:#C9A2FF; --c3:#5FDCD6; --c4:#FFB074; --on-c:#2B0F22; --shadow:rgba(0,0,0,.35);
+  --good:#7BE0A8; --good-bg:#1F4A38; --bad:#FF8FAE; --bad-bg:#4D1F34; --key-bg:#4A3A1A; --key-line:#A8892F; color-scheme:dark;}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5}
+.wrap{max-width:760px;margin:0 auto;padding-inline:16px;padding-block:20px 64px}
+h1,h2{font-family:var(--display);text-wrap:balance;margin:0}
+.eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+h1{font-size:clamp(30px,7vw,46px);line-height:1.05;font-weight:800;margin-top:6px}
+.lede{color:var(--muted);max-width:60ch;margin:10px 0 0}
+.legend{display:flex;flex-wrap:wrap;gap:8px 18px;margin:18px 0 0;padding:12px 14px;background:var(--surface);border:1px solid var(--line);border-radius:10px;font-size:14px}
+.legend span{display:flex;align-items:center;gap:8px;min-width:0}
+.badge{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;letter-spacing:.04em;padding:2px 8px;border-radius:5px;border:1.5px solid currentColor;white-space:nowrap}
+.b-ea{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+.b-book{color:var(--sky)} .b-talk{color:var(--leaf)}
+.score{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;margin:18px -16px 0;padding:10px 16px;background:var(--bg);border-bottom:1px solid var(--line)}
+.score-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.pts{font-family:var(--display);font-weight:800;font-size:26px;font-variant-numeric:tabular-nums}
+.pts small{font-size:14px;color:var(--muted);font-weight:600}
+.bar{flex:1 1 140px;height:10px;background:var(--line);border-radius:6px;overflow:hidden;min-width:100px}
+.bar i{display:block;height:100%;width:0;background:var(--leaf);transition:width .3s}
+.stars{font-size:20px;letter-spacing:2px;color:var(--accent);min-width:70px}
+.meta{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.nav{display:flex;gap:6px;overflow-x:auto;padding-top:8px}
+.nav button{flex:none;width:34px;height:34px;border-radius:8px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);font:600 13px var(--body);cursor:pointer;font-variant-numeric:tabular-nums}
+.nav button.done{background:var(--good-bg);border-color:var(--good);color:var(--good)}
+.task{background:var(--surface);border:1px solid var(--line);border-radius:14px;margin-top:18px;padding:18px;scroll-margin-top:130px}
+.th{display:flex;gap:12px;align-items:flex-start}
+.num{flex:none;width:38px;height:38px;border-radius:50%;background:var(--ink);color:var(--bg);display:grid;place-items:center;font:800 17px var(--display)}
+.th h2{font-size:21px;line-height:1.15}
+.tmeta{display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center;margin-top:6px;font-size:13px;color:var(--muted)}
+.inst{margin:12px 0 4px}
+.tip{font-size:14px;color:var(--muted);margin:6px 0 0;padding-left:10px;border-left:3px solid var(--line)}
+.items{display:flex;flex-direction:column;gap:12px;margin-top:14px}
+.item{display:flex;flex-direction:column;gap:8px;padding:10px 12px;border-radius:10px;border:1.5px solid transparent;background:var(--bg)}
+.item.ok{border-color:var(--good);background:var(--good-bg)}
+.item.no{border-color:var(--bad);background:var(--bad-bg)}
+.q{display:flex;gap:10px;align-items:flex-start;min-width:0}
+.q b.l{flex:none;font-weight:700;color:var(--muted);min-width:1.4em}
+.q span{min-width:0;overflow-wrap:anywhere}
+.opts{display:flex;flex-wrap:wrap;gap:8px}
+.opt{font:600 15px var(--body);padding:8px 14px;border-radius:8px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;min-height:40px}
+.opt[aria-pressed="true"]{border-color:var(--sky);background:var(--sky);color:var(--bg)}
+.item.ok .opt[aria-pressed="true"]{background:var(--good);border-color:var(--good);color:var(--surface)}
+.item.no .opt[aria-pressed="true"]{background:var(--bad);border-color:var(--bad);color:var(--surface)}
+.opt:disabled{cursor:default}
+input.txt,textarea.txt,select.sel{font:500 15px var(--body);width:100%;padding:9px 11px;border-radius:8px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink)}
+textarea.txt{min-height:70px;resize:vertical}
+select.sel{width:auto;min-width:76px}
+:focus-visible{outline:3px solid var(--sky);outline-offset:2px}
+.fb{display:flex;align-items:center;gap:8px;font-size:14px;flex-wrap:wrap}
+.mark{font:700 13px var(--body);padding:4px 10px;border-radius:6px;border:1.5px solid currentColor;background:transparent;cursor:pointer}
+.mark.g{color:var(--good)} .mark.r{color:var(--bad)}
+.mark[aria-pressed="true"].g{background:var(--good);color:var(--surface);border-color:var(--good)}
+.mark[aria-pressed="true"].r{background:var(--bad);color:var(--surface);border-color:var(--bad)}
+.actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:16px}
+.btn{font:700 15px var(--body);padding:10px 18px;border-radius:9px;border:0;background:var(--accent);color:var(--on-accent);cursor:pointer;min-height:44px}
+.btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line)}
+.res{font:800 17px var(--display);font-variant-numeric:tabular-nums}
+.key{margin-top:16px;padding:14px;background:var(--key-bg);border:1.5px dashed var(--key-line);border-radius:10px}
+.key h3{margin:0 0 8px;font:700 12px var(--body);letter-spacing:.08em;text-transform:uppercase}
+.key ul{margin:0;padding-left:20px} .key li{margin:3px 0;overflow-wrap:anywhere}
+.key p{margin:8px 0 0;font-size:14px}
+.final{margin-top:26px;padding:22px;border-radius:14px;background:var(--ink);color:var(--bg);text-align:center}
+.final h2{font-size:24px}
+.final .big{font:800 44px var(--display);margin:6px 0;font-variant-numeric:tabular-nums}
+.final p{margin:4px 0;color:inherit;opacity:.9}
+.slot{margin-top:12px;display:flex;flex-direction:column;gap:6px}.slot label{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}textarea.readtxt{min-height:150px;line-height:1.6;font-size:16px;background:var(--bg)}
+@media (max-width:480px){.task{padding:14px}.th h2{font-size:19px}}
+@media (prefers-reduced-motion:reduce){.bar i{transition:none}}
+
+body{background-color:var(--bg);background-image:linear-gradient(160deg,var(--bg) 0%,var(--bg2) 100%);background-attachment:fixed;min-height:100%}
+h1{background-image:linear-gradient(90deg,var(--c1),var(--c2));-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;padding-bottom:4px}
+.legend{border-radius:18px;box-shadow:0 6px 18px var(--shadow)}
+.score{background:var(--bg);background-image:linear-gradient(160deg,var(--bg),var(--bg2));border-bottom-color:var(--line)}
+.bar{height:12px;border-radius:999px}.bar i{background:linear-gradient(90deg,var(--c1),var(--c2),var(--c3));border-radius:999px}
+.nav button{border-radius:999px;border-color:var(--line)}
+.task{border-radius:22px;box-shadow:0 8px 24px var(--shadow);border-color:var(--line)}
+.num{background:var(--c1);color:var(--on-c)}
+.task:nth-child(4n+2) .num{background:var(--c2)}.task:nth-child(4n+3) .num{background:var(--c3)}.task:nth-child(4n+4) .num{background:var(--c4)}
+.task:nth-child(4n+1) h2{color:var(--c1)}.task:nth-child(4n+2) h2{color:var(--c2)}.task:nth-child(4n+3) h2{color:var(--c3)}.task:nth-child(4n+4) h2{color:var(--c4)}
+.item{border-radius:16px;background:color-mix(in srgb,var(--bg) 70%,var(--surface))}
+.opt{border-radius:999px;border-color:var(--line)}
+.opt[aria-pressed="true"]{background:var(--c2);border-color:var(--c2);color:var(--on-c)}
+.btn{border-radius:999px;box-shadow:0 4px 12px var(--shadow)}.btn.ghost{box-shadow:none}
+.badge{border-radius:999px}
+.mark{border-radius:999px}
+.key{border-radius:16px;border-style:dashed}
+.final{background:linear-gradient(135deg,var(--c1),var(--c2));color:var(--on-c);border-radius:24px}
+.final .btn{background:var(--surface)!important;color:var(--ink)!important}
+input.txt,textarea.txt,select.sel{border-radius:12px}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">Runner E · Unit B · Lesson 2 · 1-to-1</div>
+  <h1>On Safari: Past Simple</h1>
+  <p class="lede">All twelve steps of lesson B2, in the same order and timing as the plan (90 minutes). Do each step, press the check button, and the answer key opens under it. Points add up at the top.</p>
+  <div class="legend" aria-label="Symbol legend">
+    <span><i class="badge b-ea">▶ EA</i> can also be played on the EA tab</span>
+    <span><i class="badge b-book">▤ BOOK</i> done in the Runner E book</span>
+    <span><i class="badge b-talk">◐ TALK</i> speaking with the teacher</span>
+  </div>
+  <div class="score" id="score">
+    <div class="score-row">
+      <div class="pts"><span id="pt">0</span> <small>/ <span id="ptmax">0</span> pts</small></div>
+      <div class="bar" role="progressbar" aria-label="Score" aria-valuemin="0" aria-valuemax="100"><i id="barfill"></i></div>
+      <div class="stars" id="stars" aria-label="Stars">☆☆☆</div>
+      <div class="meta"><span id="dn">0</span>/12 steps</div>
+    </div>
+    <div class="nav" id="nav"></div>
+  </div>
+  <div id="tasks"></div>
+  <section class="final" id="final" hidden>
+    <h2>Lesson complete</h2>
+    <div class="big" id="fpct">0%</div>
+    <p id="fmsg"></p>
+    <p style="font-size:14px">Stars are a suggestion. The teacher decides the starchamp.</p>
+    <div class="actions" style="justify-content:center"><button class="btn" id="resetall" style="background:var(--bg);color:var(--ink)">Start over</button></div>
+  </section>
+</div>
+
+<script>
+(function(){
+const norm = s => (s||'').toLowerCase().replace(/[’‘`]/g,"'").replace(/\bdidn't\b/g,'did not').replace(/[^a-z\s]/g,' ').replace(/\s+/g,' ').trim();
+function el(tag, attrs, kids){
+  const e=document.createElement(tag);
+  for(const k in (attrs||{})){
+    if(k==='class')e.className=attrs[k]; else if(k==='text')e.textContent=attrs[k];
+    else if(k.startsWith('on'))e.addEventListener(k.slice(2),attrs[k]); else e.setAttribute(k,attrs[k]);
+  }
+  (kids||[]).forEach(c=>e.append(c)); return e;
+}
+const BADGE={ea:['b-ea','▶ EA'],book:['b-book','▤ BOOK'],talk:['b-talk','◐ TALK']};
+
+/* ---- Lesson data ---- */
+const T=[
+ {n:1,title:'Warmer',min:5,mode:['book'],page:'Book p.23, activity 1',slot:'Dialogue from book p.23, activity 1',type:'choice',
+  inst:'Read the dialogue between Otis, Adit and Emilia on page 23 with your teacher. Then answer: What did Otis do yesterday?',
+  tip:'Teacher reads Otis. The student reads Adit and Emilia, then swap.',
+  items:[{q:'What did Otis do yesterday?',opts:['He played a new board game.','He cooked with his father.','He watched cartoons.','He went to the beach.'],ans:0}],
+  keyNote:'Otis played a new board game.'},
+ {n:2,title:'Language introduction',min:5,mode:['talk','book'],page:'Book p.23, activity 2',type:'speak',
+  inst:'Speak: What did you do yesterday? Use a full sentence, like "Yesterday, I went to the park."',
+  tip:'Model first with your own sentence. Ask one or two follow-up questions. Write down errors for the Consolidation step.',
+  items:[{q:'Tell me two things you did yesterday.',key:'Answers will vary. Look for past simple verbs (went, played, watched, ate) in full sentences.'}],
+  rubric:'Teacher marks: 0 = no past form, 1 = past form with errors, 2 = clear and correct.'},
+ {n:3,title:'Grammar introduction',min:5,mode:['book'],page:'Book p.23, activity 3',type:'choice',
+  inst:'Read each sentence and choose the correct word.',
+  tip:'After each answer ask: "How do you know it is the past?"',
+  items:[
+   {q:'I (play / played) a new board game.',opts:['play','played'],ans:1},
+   {q:'We (cook / cooked) together.',opts:['cook','cooked'],ans:1},
+   {q:'It (was / were) so exciting.',opts:['was','were'],ans:0},
+   {q:'We (was / were) with our father.',opts:['was','were'],ans:1},
+   {q:"He (doesn't / didn't) have anything to do.",opts:["doesn't","didn't"],ans:1}],
+  keyNote:'Add -ed to regular verbs. Use was with singular nouns and I/he/she/it, were with plural nouns and you/we/they. Use didn\'t, wasn\'t, weren\'t for negatives.'},
+ {n:4,title:'Grammar practice 1',min:5,mode:['ea','book'],page:'EA App activity, or the teacher mini-worksheet',type:'choice',
+  inst:'Choose the correct past tense verb. Then explain to your teacher why you chose it.',
+  tip:'Original plan: play the interactive version on the EA tab. This page has the same kind of task for offline use.',
+  items:[
+   {q:'Yesterday, I ___ cartoons.',opts:['watch','watched'],ans:1},
+   {q:'Last week, we ___ the zoo.',opts:['visit','visited'],ans:1},
+   {q:'She ___ fried rice for dinner.',opts:['cook','cooked'],ans:1},
+   {q:'The elephants ___ in the mud.',opts:['play','played'],ans:1},
+   {q:'They ___ around the savannah.',opts:['walk','walked'],ans:1},
+   {q:'Dad ___ for us at the gate.',opts:['wait','waited'],ans:1}],
+  keyNote:'All six need the -ed ending because each sentence talks about the past.'},
+ {n:5,title:'Grammar practice 2',min:5,mode:['book'],page:'Book p.23, activity 4',type:'choice',
+  inst:'Fill in the blanks with was or were.',
+  tip:'Reminder: was = I / he / she / it. were = you / we / they and plural nouns.',
+  items:[
+   {q:'Kevin ___ at the backyard.',opts:['was','were'],ans:0},
+   {q:'Adit and Otis ___ excited about the savannah trip.',opts:['was','were'],ans:1},
+   {q:'I ___ sick last week.',opts:['was','were'],ans:0},
+   {q:'There ___ a hippo near the lake.',opts:['was','were'],ans:0},
+   {q:'The tigers ___ really cool.',opts:['was','were'],ans:1}],
+  keyNote:'Kevin (one person) = was. Adit and Otis (two people) = were. I = was. A hippo (one animal) = was. The tigers (plural) = were.'},
+ {n:6,title:'Reading',min:10,mode:['book'],page:'Book p.24, activity 5',slot:'Story from book p.24, activity 5',type:'open',
+  inst:'Read the story of Grandma and Grandpa on page 24. Type your answers, then open the key and mark each one.',
+  tip:'Ask the student to point to the sentence in the text that supports each answer.',
+  items:[
+   {q:'What was the story about?',key:"The story was about Grandma and Grandpa's adventure to Africa when they were young."},
+   {q:'What animals were on the safari?',key:'There were the elephants on the safari.'},
+   {q:'What did the elephants do in the story?',key:'The elephants played in the mud. They splashed and rolled in the cool, brown mud.'},
+   {q:'How did grandma and grandpa feel when they saw the elephants playing?',key:'Grandma and Grandpa felt happy when they saw the elephants playing. They laughed and smiled while watching them.'},
+   {q:'What did grandma and grandpa do to say goodbye to the elephants?',key:'Grandma and Grandpa waved goodbye to the elephants when the sun went down.'}],
+  keyNote:'Accept answers that carry the same meaning, in full past simple sentences.'},
+ {n:7,title:'Follow up reading practice',min:5,mode:['ea','book'],page:'Book p.24, activity 6 (EA App or book)',type:'order',
+  inst:"Put the story of Intan in order. Choose 1 to 5 for each sentence.",
+  tip:'After checking, the student retells the story in 4 or 5 sentences. Prompt: "What happened first? And then?"',
+  items:[
+   {q:'She prepared the ingredients one by one.',ans:3},
+   {q:"She didn't know what to buy so she asked Emilia's father.",ans:2},
+   {q:'One day, Intan wanted to cook Indonesian fried rice.',ans:1},
+   {q:'Intan cooked the fried rice carefully.',ans:4},
+   {q:'She finally served a plate of fried rice.',ans:5}],
+  keyNote:'Order: 1 One day, Intan wanted to cook Indonesian fried rice. 2 She didn\'t know what to buy so she asked Emilia\'s father. 3 She prepared the ingredients one by one. 4 Intan cooked the fried rice carefully. 5 She finally served a plate of fried rice.'},
+ {n:8,title:'Grammar practice 3',min:5,mode:['book'],page:'Book p.24, activity 7',type:'tick',
+  inst:'Which sentences talk about the past? Choose Past or Not past.',
+  tip:'For each past sentence the student says which word shows the past (were, didn\'t, weren\'t).',
+  items:[
+   {q:'The tigers always hunt. (example)',ans:false,ex:true},
+   {q:'There were pandas in the zoo.',ans:true},
+   {q:'There are many flamingos.',ans:false},
+   {q:'I am very excited to see some deer.',ans:false},
+   {q:"I didn't give food to the hippos.",ans:true},
+   {q:"The animals weren't that cute.",ans:true}],
+  keyNote:'Past: were, didn\'t, weren\'t. Not past: always hunt, are, am.'},
+ {n:9,title:'Grammar practice 4',min:5,mode:['ea','book'],page:'Book p.25, activity 8 (EA App or book)',type:'text',
+  inst:'Write what Emilia did last week. A green tick means she did it. A red cross means she did not.',
+  tip:'Auto-check is strict about wording. If a correct answer shows red, tap the mark to count it as correct.',
+  items:[
+   {q:'✗ call her grandma and grandpa',hint:'Emilia ...',acc:['emilia did not call her grandma and grandpa','emilia did not call her grandpa and grandma'],key:"Emilia didn't call her grandma and grandpa."},
+   {q:'✓ happy to watch cartoons about savannah animals',hint:'Emilia ...',acc:['emilia was happy to watch cartoons about savannah animals'],key:'Emilia was happy to watch cartoons about savannah animals.'},
+   {q:'✗ go to the beach',hint:'Emilia ...',acc:['emilia did not go to the beach'],key:"Emilia didn't go to the beach."},
+   {q:'✗ sleep late',hint:'Emilia ...',acc:['emilia did not sleep late'],key:"Emilia didn't sleep late."},
+   {q:'✓ cook with her father',hint:'Emilia ...',acc:['emilia cooked with her father','emilia cooked with her dad'],key:'Emilia cooked with her father.'}],
+  keyNote:"Red cross = didn't + base verb (didn't go, not didn't went). Green tick = past form (was, cooked)."},
+ {n:10,title:'Grammar practice 5: Pass the ball',min:15,mode:['talk','book'],page:'Book p.25, activity 9',type:'speak',
+  inst:'Play the ball game. When the music stops, make a sentence about the picture using the past verb. Teacher marks each sentence.',
+  tip:'Teacher plays too and makes one deliberate mistake for the student to catch. Play 8 to 10 rounds, then score these five pictures.',
+  items:[
+   {q:'a. Cheetah (walk)',key:'The cheetah walked on the grass.'},
+   {q:'b. Tortoise (move)',key:'The tortoise moved slowly.'},
+   {q:'c. Hyena (laugh)',key:'The hyena laughed loudly.'},
+   {q:'d. Deer (jump)',key:'The deer jumped over the bush.'},
+   {q:'e. Tiger (roar)',key:'The tiger roared loudly.'}],
+  rubric:'Teacher marks each sentence: 0 = no sentence or wrong form, 1 = past verb with small errors, 2 = full correct sentence. Answers will vary.'},
+ {n:11,title:'Writing and Speaking: Comic strip',min:20,mode:['ea','book','talk'],page:'Book p.26, activity 4 (EA App or book)',type:'speak',
+  inst:'Draw a four-panel comic about a past zoo trip in your book. Write one past simple sentence for each panel here, then tell the comic to your teacher.',
+  tip:'Talk first (3 min), plan (2), draw and write (10), present (5). Ask: What did you see? Was it fun? Award starchamp depending on the drawing.',
+  items:[
+   {q:'Panel 1 (first)',key:'Answers will vary. Example: I saw a big elephant.',ta:true},
+   {q:'Panel 2 (next)',key:'Answers will vary. Example: The monkeys jumped on the tree.',ta:true},
+   {q:'Panel 3 (then)',key:'Answers will vary. Example: We ate ice cream near the lake.',ta:true},
+   {q:'Panel 4 (finally)',key:'Answers will vary. Example: We were tired but happy.',ta:true}],
+  rubric:'Teacher marks each panel: 0 = no past simple, 1 = past simple with errors, 2 = clear and correct.'},
+ {n:12,title:'Consolidation',min:5,mode:['ea'],page:'Teacher questions (EA App version available)',type:'choice',
+  inst:'Last check. Choose the correct answer.',
+  tip:'Then correct 3 to 5 sentences from the teacher\'s error log.',
+  items:[
+   {q:'What do we use with more than one person or thing in the past?',opts:['was','were'],ans:1},
+   {q:'Which sentence is correct?',opts:['Kevin was in the backyard','Kevin were in the backyard'],ans:0},
+   {q:'Which sentence is correct?',opts:['I played soccer yesterday','I play soccer yesterday'],ans:0},
+   {q:'Which sentence is correct?',opts:["She didn't go to the zoo","She didn't went to the zoo"],ans:0}],
+  keyNote:'a. were  b. Kevin was in the backyard  c. I played soccer yesterday  d. She didn\'t go to the zoo.'}
+];
+
+const state={}; // n -> {scores:[], max, done}
+T.forEach(t=>{const per=t.type==='speak'?2:1; t.per=per; t.max=t.items.filter(i=>!i.ex).length*per; state[t.n]={scores:[],done:false};});
+const MAX=T.reduce((a,t)=>a+t.max,0);
+
+function sum(n){return state[n].scores.reduce((a,b)=>a+(b||0),0);}
+function refresh(){
+  const tot=T.reduce((a,t)=>a+sum(t.n),0), done=T.filter(t=>state[t.n].done).length;
+  const pct=Math.round(tot/MAX*100);
+  document.getElementById('pt').textContent=tot; document.getElementById('ptmax').textContent=MAX;
+  document.getElementById('barfill').style.width=pct+'%';
+  document.querySelector('.bar').setAttribute('aria-valuenow',pct);
+  document.getElementById('dn').textContent=done;
+  const s=done<12?0:(pct>=90?3:pct>=70?2:1);
+  const stars=done===0?0:Math.max(s,0);
+  document.getElementById('stars').textContent=(done<12?'☆☆☆':'★'.repeat(s)+'☆'.repeat(3-s));
+  T.forEach(t=>{const b=document.querySelector('#nav button[data-n="'+t.n+'"]'); b.classList.toggle('done',state[t.n].done);});
+  const f=document.getElementById('final');
+  if(done===12){f.hidden=false;document.getElementById('fpct').textContent=pct+'%  ('+tot+'/'+MAX+')';
+    document.getElementById('fmsg').textContent=pct>=90?'Excellent. Past simple is solid.':pct>=70?'Good work. Review the items you missed with the answer keys.':'Keep going. Go back to the grammar box on page 23 and try the red items again.';}
+  else f.hidden=true;
+}
+
+function build(t){
+  const st=state[t.n]; st.scores=[]; st.done=false;
+  const card=el('section',{class:'task',id:'t'+t.n});
+  const badges=el('div',{class:'tmeta'},t.mode.map(m=>el('span',{class:'badge '+BADGE[m][0],text:BADGE[m][1]})));
+  badges.append(el('span',{text:t.min+' min · '+t.page+' · '+t.max+' pts'}));
+  card.append(el('div',{class:'th'},[el('div',{class:'num',text:t.n}),el('div',{style:'min-width:0'},[el('h2',{text:t.title}),badges])]));
+  card.append(el('p',{class:'inst',text:t.inst}));
+  if(t.tip)card.append(el('p',{class:'tip',text:'Teacher: '+t.tip}));
+  if(t.slot){
+    const key2='b2text'+t.n; let saved=''; try{saved=localStorage.getItem(key2)||'';}catch(e){}
+    const ta=el('textarea',{class:'txt readtxt',id:'slot'+t.n,'aria-label':t.slot,placeholder:'Paste the text here: '+t.slot,oninput:e=>{try{localStorage.setItem(key2,e.target.value);}catch(err){}}});
+    ta.value=saved;
+    card.append(el('div',{class:'slot'},[el('label',{for:'slot'+t.n,text:'Reading text (paste once, it is remembered on this device)'}),ta]));
+  }
+  const list=el('div',{class:'items'}); card.append(list);
+  const actions=el('div',{class:'actions'});
+  const res=el('span',{class:'res'});
+  const key=el('div',{class:'key',hidden:''}); key.hidden=true;
+  const rows=[]; const ans=[]; // per item
+  const manual=(t.type==='open'||t.type==='speak');
+  let idx=0;
+  t.items.forEach((it,i)=>{
+    const row=el('div',{class:'item'}); rows.push(row);
+    const lab=String.fromCharCode(97+i)+'.';
+    if(t.type==='choice'){
+      const bs=it.opts.map((o,k)=>el('button',{class:'opt','aria-pressed':'false',type:'button',text:o,onclick:()=>{ if(st.done)return; ans[i]=k; bs.forEach((b,j)=>b.setAttribute('aria-pressed',String(j===k)));}}));
+      row.append(el('div',{class:'q'},[el('b',{class:'l',text:lab}),el('span',{text:it.q})]),el('div',{class:'opts'},bs)); it._bs=bs;
+    } else if(t.type==='tick'){
+      if(it.ex){row.append(el('div',{class:'q'},[el('b',{class:'l',text:'0.'}),el('span',{text:it.q+' → Not past'})]));row.style.opacity='.75';return;}
+      const bs=[['Past ✔',true],['Not past ✗',false]].map(([txt,v])=>el('button',{class:'opt','aria-pressed':'false',type:'button',text:txt,onclick:()=>{if(st.done)return;ans[i]=v;bs.forEach(b=>b.setAttribute('aria-pressed',String(b.textContent===txt)));}}));
+      row.append(el('div',{class:'q'},[el('b',{class:'l',text:String.fromCharCode(96+i)+'.'}),el('span',{text:it.q})]),el('div',{class:'opts'},bs)); it._bs=bs;
+    } else if(t.type==='order'){
+      const sel=el('select',{class:'sel','aria-label':'Order for sentence '+(i+1),onchange:e=>{ans[i]=+e.target.value||0;}},[el('option',{value:'',text:'–'})].concat([1,2,3,4,5].map(v=>el('option',{value:v,text:v}))));
+      sel.disabled=false; it._sel=sel;
+      row.append(el('div',{class:'q'},[el('b',{class:'l',text:lab}),el('span',{text:it.q})]),el('div',{},[sel]));
+    } else if(t.type==='text'){
+      const inp=el('input',{class:'txt',type:'text',placeholder:it.hint,'aria-label':it.q,oninput:e=>{ans[i]=e.target.value;}}); it._inp=inp;
+      row.append(el('div',{class:'q'},[el('b',{class:'l',text:lab}),el('span',{text:it.q})]),inp);
+    } else if(t.type==='open'||(t.type==='speak'&&it.ta)){
+      const ta=el('textarea',{class:'txt','aria-label':it.q,placeholder:'Type here (optional for speaking)'}); row.append(el('div',{class:'q'},[el('b',{class:'l',text:lab}),el('span',{text:it.q})]),ta);
+    } else {
+      row.append(el('div',{class:'q'},[el('b',{class:'l',text:lab}),el('span',{text:it.q})]));
+    }
+    row._fb=el('div',{class:'fb'}); row.append(row._fb);
+    list.append(row);
+  });
+  // tick example row must also be appended
+  if(t.type==='tick'){ list.innerHTML=''; t.items.forEach((it,i)=>{}); }
+  if(t.type==='tick'){ rows.forEach(r=>list.append(r)); }
+  else if(!list.children.length){ rows.forEach(r=>list.append(r)); }
+
+  function setScore(i,v,row){ st.scores[i]=v; row.classList.toggle('ok',v===t.per); row.classList.toggle('no',v===0); res.textContent=sum(t.n)+' / '+t.max; refresh(); }
+
+  function showKey(){
+    key.innerHTML=''; key.hidden=false;
+    key.append(el('h3',{text:'Answer key'}));
+    const ul=el('ul'); t.items.forEach((it,i)=>{
+      let txt;
+      if(t.type==='choice') txt=it.q+'  →  '+it.opts[it.ans];
+      else if(t.type==='tick') txt=it.q+'  →  '+(it.ans?'Past ✔':'Not past ✗');
+      else if(t.type==='order') txt=it.q+'  →  '+it.ans;
+      else txt=(it.q.length<60?it.q+'  →  ':'')+it.key;
+      ul.append(el('li',{text:txt}));
+    });
+    key.append(ul);
+    if(t.keyNote)key.append(el('p',{text:t.keyNote}));
+    if(t.rubric)key.append(el('p',{text:t.rubric}));
+  }
+
+  const checkBtn=el('button',{class:'btn',type:'button',text:manual?'Show answer key and mark':'Check answers'});
+  const retry=el('button',{class:'btn ghost',type:'button',text:'Try again'}); retry.hidden=true;
+  actions.append(checkBtn,retry,res); card.append(actions,key);
+
+  checkBtn.addEventListener('click',()=>{
+    if(st.done)return;
+    st.done=true; checkBtn.hidden=true; retry.hidden=false; showKey();
+    t.items.forEach((it,i)=>{
+      const row=rows[i]; if(it.ex)return;
+      if(t.type==='choice'||t.type==='tick'){ const ok=(t.type==='choice'?ans[i]===it.ans:ans[i]===it.ans); setScore(i,ok?1:0,row); it._bs.forEach(b=>b.disabled=true);
+        if(!ok)row._fb.textContent=ans[i]===undefined?'No answer chosen.':''; }
+      else if(t.type==='order'){ const ok=ans[i]===it.ans; setScore(i,ok?1:0,row); it._sel.disabled=true; if(!ok)row._fb.textContent='Correct number: '+it.ans; }
+      else if(t.type==='text'){ const ok=it.acc.includes(norm(ans[i])); setScore(i,ok?1:0,row); it._inp.disabled=true;
+        const m=el('button',{class:'mark '+(ok?'g':'r'),type:'button','aria-pressed':'true',text:ok?'✔ Correct':'✗ Not matched · tap to count as correct',onclick:()=>{const now=st.scores[i]?0:1; setScore(i,now,row); m.className='mark '+(now?'g':'r'); m.textContent=now?'✔ Counted correct · tap to undo':'✗ Not matched · tap to count as correct';}});
+        row._fb.append(m); }
+      else { // manual
+        const g=t.per===1?[['✗ Not yet',0,'r'],['✔ Correct',1,'g']]:[['0',0,'r'],['1',1,'g'],['2',2,'g']];
+        row._fb.append(el('span',{text:t.per===1?'Mark:':'Teacher mark (0–2):'}));
+        const bs=g.map(([txt,v,c])=>el('button',{class:'mark '+c,type:'button','aria-pressed':'false',text:txt,onclick:()=>{bs.forEach(b=>b.setAttribute('aria-pressed',String(b.textContent===txt)));setScore(i,v,row);}}));
+        row._fb.append(...bs); st.scores[i]=0;
+      }
+    });
+    res.textContent=sum(t.n)+' / '+t.max; refresh();
+  });
+  retry.addEventListener('click',()=>{ const fresh=build(t); card.replaceWith(fresh); refresh(); fresh.scrollIntoView({block:'start'}); });
+  return card;
+}
+
+const host=document.getElementById('tasks'), nav=document.getElementById('nav');
+function renderAll(){
+  host.innerHTML=''; nav.innerHTML='';
+  document.getElementById('ptmax').textContent=MAX;
+  T.forEach(t=>{ host.append(build(t)); nav.append(el('button',{type:'button','data-n':t.n,'aria-label':'Go to step '+t.n,text:t.n,onclick:()=>document.getElementById('t'+t.n).scrollIntoView({behavior:'smooth',block:'start'})})); });
+  refresh();
+}
+document.getElementById('resetall').addEventListener('click',()=>{renderAll();window.scrollTo({top:0});});
+renderAll();
+})();
+</script>
+</body>
+</html>
